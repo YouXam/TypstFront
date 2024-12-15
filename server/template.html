@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            width: 100%;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <main id="svg">
+        {{svg}}
+    </main>
+    <script>
+        let keydownListeners = [];
+        function load(_url, push = true) {
+            const url = new URL(_url)
+            const search = new URLSearchParams(url.search)
+            url.searchParams.set('_svg', '');
+            const newUrl = url.origin + url.pathname + '?' + url.searchParams.toString();
+            fetch(newUrl).then(res => res.text()).then(svg => {
+                document.getElementById('svg').innerHTML = svg;
+                if (push) {
+                    history.pushState({}, '', url.pathname + (url.pathname.endsWith('/') ? '' : '/') + (
+                        search.toString() ? '?' + search.toString() : ''
+                    ))
+                }
+                update();
+            });
+        }
+        function action(data) {
+            const search = new URLSearchParams(location.search)
+            search.set('_svg', '');
+            const url = location.origin + location.pathname + '?' + search.toString()
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(res => {
+                if (res.headers.get("Location")) {
+                    load(new URL(res.headers.get("Location"), location.origin + location.pathname))
+                }
+                return res.text()
+            }).then(svg => {
+                document.getElementById('svg').innerHTML = svg;
+                update();
+            });
+        }
+        function update() {
+            const links = document.querySelectorAll('a');
+            if (!links) return
+            while (keydownListeners.length) {
+                const handler = keydownListeners.pop();
+                document.removeEventListener('keydown', handler);
+            }
+            links.forEach(link => {
+                const href = link.getAttribute('xlink:href');
+                if (href) {
+                    const url = new URL(href, location.origin + location.pathname)
+                    if (url.origin !== location.origin) link.setAttribute('target', '_blank');
+                    else if (url.pathname === '/_action') {
+                        link.setAttribute('href', 'javascript:void(0)');
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            action(JSON.parse(url.searchParams.get('data')))
+                        });
+                    } else if (url.pathname === '/_keydown') {
+                        link.remove();
+                        function handler(e) {
+                            if (url.searchParams.get('code') && e.keyCode.toString() !== url.searchParams.get('code')) return;
+                            if (url.searchParams.get('key') && e.key !== url.searchParams.get('key')) return
+                            if (url.searchParams.get('prevent_default') === 'true') e.preventDefault();
+                            action(JSON.parse(url.searchParams.get('data')))
+                        };
+                        document.addEventListener('keydown', handler);
+                        keydownListeners.push(handler);
+                    } else {
+                        link.removeAttribute('target');
+                        link.addEventListener('click', (e) => {
+                            if (event.ctrlKey || event.metaKey) {
+                                return;
+                            }
+                            e.preventDefault();
+                            load(url);
+                        });
+                    }
+                }
+            });
+        }
+        update();
+        window.addEventListener('popstate', () => {
+            load(location.href, false);
+        });
+        if (!location.pathname.endsWith('/')) {
+            window.history.replaceState({}, '', location.pathname + '/');
+        }
+    </script>
+</body>
+
+</html>
