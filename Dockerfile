@@ -8,8 +8,8 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production
 
 FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
-COPY ./typst .
-COPY ./server .
+COPY ./typst ./typst
+COPY ./server ./server
 
 USER bun
 EXPOSE 3000/tcp
