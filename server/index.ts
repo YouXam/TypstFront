@@ -80,7 +80,7 @@ const app = new Hono()
         })
     })
 
-export default {
+Bun.serve({
     idleTimeout: 255,
     fetch: app.fetch
-}
+})
