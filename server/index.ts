@@ -7,6 +7,8 @@ import typst from './typst'
 import { Hono } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 
+import { TempMap } from './tempMap';
+
 const templateHTML = path.join(__dirname, 'template.html');
 const indexTypst = path.join(__dirname, 'index.typ');
 
@@ -16,7 +18,7 @@ function template(svg: string): string {
     return templateString[0] + svg + templateString[1];
 }
 
-const storage = new Map<string, Record<string, any>>();
+const storage = new TempMap<string, Record<string, any>>();
 const typstBase = './typst';
 
 const app = new Hono()
@@ -28,18 +30,14 @@ const app = new Hono()
         if (!sessionId) {
             sessionId = Math.random().toString(36).slice(2);
             setCookie(c, 'sessionId', sessionId, {
-                maxAge: 60 * 60 * 24 * 365
+                maxAge: 60 * 60 * 24 * 365,
+                path: "/"
             })
         }
         const storageValue = storage.get(sessionId) || {};
         const route = path.join(typstBase, "pages", url.pathname, "page.typ");
         if (!await Bun.file(route).exists()) {
-            return new Response("404 Not Found", {
-                status: 404,
-                headers: {
-                    "Content-Type": "text/plain"
-                }
-            })
+            return c.text("404 Not Found", 404)
         }
         let state = {}
         if (req.method === "POST") {
@@ -55,7 +53,7 @@ const app = new Hono()
                 storage.set(sessionId, storageValue);
             }
             if (data?.redirect) {
-                return new Response(null, {
+                return c.text('', {
                     status: 200,
                     headers: {
                         "Location": data.redirect
@@ -73,11 +71,7 @@ const app = new Hono()
             `\n#import "/pages${url.pathname.replace(/^\/$/, '')}/page.typ": Page` +
             `\n#Page(ctx: ctx, query: _query, storage: _storage)`;
         const svg = await typst.svg({ mainContent });
-        return new Response(params.has('_svg') ? svg : template(svg), {
-            headers: {
-                "Content-Type": "text/html"
-            }
-        })
+        return c.html(params.has('_svg') ? svg : template(svg))
     })
 
 Bun.serve({
