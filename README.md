@@ -2,8 +2,6 @@
 
 A front-end framework that allows you to build web pages using Typst. This project is mainly for fun and not intended to be used in production.
 
-[Live Demo](https://typstfront.youx.am/)
-
 ## Getting Started
 
 ### Docker
