@@ -28,7 +28,7 @@ The server will be running at `http://localhost:3000`.
 
 ## How it works
 
-See https://typstfront.youx.am/explain/ for more information.
+See https://github.com/YouXam/TypstFront/blob/main/typst/pages/explain/page.typ for more information.
 
 ## License
 
