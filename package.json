@@ -4,10 +4,15 @@
   "type": "module",
   "scripts": {
     "dev": "ENV=dev bun run --hot server/index.ts",
-    "serve": "ENV=prod bun run server/index.ts"
+    "serve": "ENV=prod bun run server/index.ts",
+		"deploy": "wrangler deploy",
+		"cf-dev": "wrangler dev",
+		"cf-typegen": "wrangler types"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.14"
+    "@types/bun": "^1.1.14",
+    "typescript": "^5.5.2",
+		"wrangler": "^4.22.0"
   },
   "peerDependencies": {
     "typescript": "^5.7.2"
@@ -16,6 +21,7 @@
     "@myriaddreamin/typst-ts-renderer": "^0.5.1",
     "@myriaddreamin/typst-ts-web-compiler": "^0.5.1",
     "@myriaddreamin/typst.ts": "^0.5.1",
-    "hono": "^4.6.14"
+    "hono": "^4.6.14",
+    "@cloudflare/containers": "^0.0.16"
   }
 }

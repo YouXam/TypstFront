@@ -34,6 +34,7 @@ const app = new Hono()
                 path: "/"
             })
         }
+        console.log(`[${req.method}] ${url.pathname} - Session ID: ${sessionId}`);
         const storageValue = storage.get(sessionId) || {};
         const route = path.join(typstBase, "pages", url.pathname, "page.typ");
         if (!await Bun.file(route).exists()) {
@@ -74,6 +75,7 @@ const app = new Hono()
         return c.html(params.has('_svg') ? svg : template(svg))
     })
 
+console.log('TypstFront server is running...');
 Bun.serve({
     idleTimeout: 255,
     fetch: app.fetch
