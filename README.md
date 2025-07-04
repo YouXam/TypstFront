@@ -2,8 +2,6 @@
 
 A front-end framework that allows you to build web pages using Typst. This project is mainly for fun and not intended to be used in production.
 
-[Live Demo](https://typstfront.youx.am/)
-
 ## Getting Started
 
 ### Docker
@@ -30,7 +28,7 @@ The server will be running at `http://localhost:3000`.
 
 ## How it works
 
-See https://typstfront.youx.am/explain/ for more information.
+See https://github.com/YouXam/TypstFront/blob/main/typst/pages/explain/page.typ for more information.
 
 ## License
 
